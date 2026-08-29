@@ -9,6 +9,7 @@ from docx import Document
 
 from docx_de_identifier.cli import main
 from docx_de_identifier.config import load_config
+from docx_de_identifier.trial import main as trial_main
 
 
 def test_config_rejects_hosted_llm_endpoint(tmp_path: Path) -> None:
@@ -55,3 +56,51 @@ def test_cli_writes_atomic_docx_and_pii_free_audit(tmp_path: Path) -> None:
     assert audit["source_sha256"]
     assert audit["output_sha256"]
     assert len(audit["events"]) == 3
+
+
+def test_trial_writes_metadata_only_validation_report(tmp_path: Path) -> None:
+    model_path = tmp_path / "ner-model"
+    nlp = spacy.blank("en")
+    ruler = nlp.add_pipe("entity_ruler")
+    ruler.add_patterns([{"label": "PERSON", "pattern": "Jane Smith"}])
+    nlp.to_disk(model_path)
+
+    source = tmp_path / "source.docx"
+    output = tmp_path / "result.docx"
+    document = Document()
+    document.add_paragraph("Jane Smith emailed jane@example.org")
+    document.save(source)
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(yaml.safe_dump({"spacy_model": str(model_path)}), encoding="utf-8")
+
+    exit_code = trial_main([str(source), "--output", str(output), "--config", str(config_path)])
+
+    report_path = output.with_suffix(".validation.json")
+    report_text = report_path.read_text(encoding="utf-8")
+    assert exit_code == 0
+    assert report_path.exists()
+    assert "Jane Smith" not in report_text
+    assert "jane@example.org" not in report_text
+    report = json.loads(report_text)
+    assert report["source_unchanged"] is True
+    assert report["audit_privacy_valid"] is True
+    assert report["temporary_artifacts_absent"] is True
+
+    original_report = report_path.read_bytes()
+    changed = Document(source)
+    changed.add_paragraph("Replacement disposable content")
+    changed.save(source)
+
+    second_exit_code = trial_main(
+        [
+            str(source),
+            "--output",
+            str(output),
+            "--config",
+            str(config_path),
+            "--overwrite",
+        ]
+    )
+
+    assert second_exit_code == 1
+    assert report_path.read_bytes() == original_report
