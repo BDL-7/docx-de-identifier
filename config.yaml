@@ -1,0 +1,22 @@
+redact_alias_codes: true
+redact_relative_timestamps: true
+redact_absolute_timestamps: true
+enable_llm_disambiguation: false
+spacy_model: en_core_web_sm
+audit_suffix: .audit.json
+
+placeholder_format:
+  PERSON: "[PERSON_{n:02d}]"
+  EMAIL: "[EMAIL_{n:02d}]"
+  PHONE: "[PHONE_{n:02d}]"
+  ALIAS: "[ALIAS_{n:02d}]"
+  ABSOLUTE_TIMESTAMP: "[TIMESTAMP_{n:02d}]"
+  RELATIVE_TIMESTAMP: "[TIMESTAMP_{n:02d}]"
+  DURATION: "[DURATION_{n:02d}]"
+
+url_allowlist_patterns: []
+
+llm:
+  endpoint: http://127.0.0.1:11434
+  model: ""
+  reject_threshold: 0.9

@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "docx-de-identifier"
+version = "0.1.0"
+description = "Offline multi-agent DOCX de-identification CLI"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "langgraph>=0.2,<2",
+    "lxml>=5,<7",
+    "python-docx>=1.2,<2",
+    "PyYAML>=6,<7",
+    "spacy>=3.8,<4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "build>=1.2,<2",
+    "lxml-stubs>=0.5,<1",
+    "mypy>=1.14,<2",
+    "pytest>=8.3,<10",
+    "pytest-cov>=6,<8",
+    "ruff>=0.9,<1",
+    "types-PyYAML>=6,<7",
+]
+
+[project.scripts]
+docx-de-identifier = "docx_de_identifier.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+packages = ["docx_de_identifier"]
+mypy_path = "src"
