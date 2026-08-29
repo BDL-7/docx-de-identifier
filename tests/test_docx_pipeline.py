@@ -14,6 +14,7 @@ from docx_de_identifier.agents.merge import merge_agent
 from docx_de_identifier.agents.redact import redact_agent
 from docx_de_identifier.agents.regex_detect import regex_detection_agent
 from docx_de_identifier.config import AppConfig
+from docx_de_identifier.validation import body_hyperlinks
 
 PNG_1X1 = base64.b64decode(
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZQmcAAAAASUVORK5CYII="
@@ -77,6 +78,7 @@ def test_ingestion_redaction_and_surface_removal(tmp_path: Path) -> None:
     state.update(merge_agent(state, config))
     state.update(redact_agent(state))
 
+    assert body_hyperlinks(output) == body_hyperlinks(source)
     reopened = Document(output)
     body_text = "\n".join(paragraph.text for paragraph in reopened.paragraphs)
     table_text = reopened.tables[0].cell(0, 0).text

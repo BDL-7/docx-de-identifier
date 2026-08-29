@@ -30,6 +30,32 @@ docx-de-identifier input.docx --output output.docx --config config.yaml
 
 The default outputs are `input.deidentified.docx` and `input.deidentified.audit.json`. Existing outputs are protected unless `--overwrite` is supplied.
 
+## Controlled Document Validation
+
+Keep disposable source copies under ignored `Docs/` and trial artifacts under ignored
+`test-output/`. Run one pilot with the checked-in configuration and local LLM disabled:
+
+```powershell
+docx-de-identifier-trial Docs/doc1.docx `
+    --output test-output/doc1.deidentified.docx `
+    --config config.yaml
+```
+
+The trial command captures the source hash before processing, runs the normal offline pipeline,
+and writes `doc1.deidentified.validation.json`. The report contains only file names, sizes,
+hashes, counts, and validation results. It verifies that the source is unchanged, the output
+package is reopenable and free of forbidden content, body hyperlink display text and targets
+are unchanged, detected source values are absent from the audit JSON, and temporary files were
+removed. On an `--overwrite` rerun, the command also requires the source hash to match the
+existing validation report. Delete all three prior trial artifacts only when intentionally
+establishing a new disposable source baseline.
+
+Only proceed to `doc2.docx` and `doc3.docx` after the pilot passes. Then inspect each source and
+output side by side in Word. Confirm that ordinary body and nested-table prose remains readable,
+identifiers are replaced, hyperlinks still open the same targets with unchanged display text,
+and excluded surfaces and visuals are absent. Do not paste document text into issues or logs. If
+a defect is found, reproduce it with a synthetic fixture before changing production behavior.
+
 ## Configuration
 
 The checked-in `config.yaml` contains conservative defaults:

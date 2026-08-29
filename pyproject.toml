@@ -29,6 +29,7 @@ dev = [
 
 [project.scripts]
 docx-de-identifier = "docx_de_identifier.cli:main"
+docx-de-identifier-trial = "docx_de_identifier.trial:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

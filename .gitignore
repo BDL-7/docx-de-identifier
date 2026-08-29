@@ -25,6 +25,8 @@ dist/
 
 # Generated and temporary Office files
 output/
+Docs/
+test-output/
 *.tmp
 *.docx
 ~$*.docx
